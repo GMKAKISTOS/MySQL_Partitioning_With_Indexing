@@ -1,0 +1,54 @@
+import csv
+import random
+import os
+from faker import Faker
+from datetime import datetime, timedelta
+
+# Initialize Faker
+faker = Faker()
+
+# Constants
+TOTAL_ROWS = 1_000_000
+
+# Get user's home directory and construct desktop path
+home_dir = os.path.expanduser("~")
+desktop_path = os.path.join(home_dir, 'Desktop')
+CSV_FILE = os.path.join(desktop_path, 'employees_data.csv')
+
+# Date ranges
+HIRE_START_DATE = datetime(2000, 1, 1)
+HIRE_END_DATE = datetime(2023, 12, 31)
+SEPARATED_END_DATE = datetime(9999, 12, 31)
+SEPARATED_START_DATE = datetime(2000, 1, 1)
+
+def random_date(start, end):
+    """Generate a random date between start and end."""
+    delta = end - start
+    random_days = random.randint(0, delta.days)
+    return start + timedelta(days=random_days)
+
+def generate_row():
+    """Generate a single row of data."""
+    fname = faker.first_name()
+    lname = faker.last_name()
+    hired_date = random_date(HIRE_START_DATE, HIRE_END_DATE).date()
+    separated_date = random_date(SEPARATED_START_DATE, SEPARATED_END_DATE).date()
+    job_code = random.randint(1000, 9999)
+    store_id = random.randint(1, 20)  # Assuming store_id ranges from 1 to 20
+    return [fname, lname, hired_date.isoformat(), separated_date.isoformat(), job_code, store_id]
+
+def main():
+    with open(CSV_FILE, mode='w', newline='', encoding='utf-8') as csvfile:
+        writer = csv.writer(csvfile)
+        # Optional: Write header
+        # writer.writerow(['fname', 'lname', 'hired', 'separated', 'job_code', 'store_id'])
+        
+        for i in range(TOTAL_ROWS):
+            row = generate_row()
+            writer.writerow(row)
+            if (i + 1) % 100000 == 0:
+                print(f"{i + 1} rows generated and written to CSV.")
+    print(f"Data generation complete! CSV saved to {CSV_FILE}")
+
+if __name__ == "__main__":
+    main()
